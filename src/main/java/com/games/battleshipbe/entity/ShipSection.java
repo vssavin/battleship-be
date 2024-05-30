@@ -17,6 +17,10 @@ public class ShipSection {
     @JoinColumn(name = "ship_id", referencedColumnName = "id")
     private Ship ship;
 
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    private Player player;
+
     @Column(name = "location_x")
     private Integer locationX;
 

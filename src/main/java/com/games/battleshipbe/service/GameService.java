@@ -5,7 +5,7 @@ import com.games.battleshipbe.dto.ShootDTO;
 
 public interface GameService {
 
-    Long startGame();
+    Long startGame(Long playerId);
 
     Long putShip(ShipDTO shipDTO);
 

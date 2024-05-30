@@ -14,4 +14,7 @@ public class Player {
     private Long id;
 
     private String name;
+
+    @Column(name = "ship_count")
+    private Integer shipCount;
 }

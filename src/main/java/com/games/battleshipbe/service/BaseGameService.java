@@ -102,17 +102,30 @@ public class BaseGameService implements GameService {
 
     @Override
     public String shoot(ShootDTO shootDTO) {
-        Player shooter = checkPlayerValid(shootDTO.playerId());
+        Player requestShooter = checkPlayerValid(shootDTO.playerId());
 
         Optional<Game> optionalGame = gameRepository.findById(shootDTO.gameId());
 
         checkGameValid(optionalGame);
         Game game = optionalGame.get();
 
+        if (!game.getShooter().equals(requestShooter)) {
+            throw new IllegalArgumentException("Другой игрок еще не произвел выстрел!");
+        }
+
         Player targetPlayer = getTargetPlayer(shootDTO, game);
 
         Optional<ShipSection> optionalSection = shipSectionRepository.findShipSectionByPlayerAndLocationXAndLocationY(
                 targetPlayer, shootDTO.location().x(), shootDTO.location().y());
+
+        Player nextShooter;
+        if (game.getPlayer1().equals(requestShooter)) {
+            nextShooter = game.getPlayer2();
+        } else {
+            nextShooter = game.getPlayer1();
+        }
+
+        game.setShooter(nextShooter);
 
         if (optionalSection.isEmpty()) {
             return "мимо";
@@ -125,10 +138,10 @@ public class BaseGameService implements GameService {
                 }
 
                 if (isAllShipsDestroyed(targetPlayer)) {
-                    game.setWinner(shooter);
-                    shipSectionRepository.deleteByPlayer(shooter);
+                    game.setWinner(requestShooter);
+                    shipSectionRepository.deleteByPlayer(requestShooter);
                     shipSectionRepository.deleteByPlayer(targetPlayer);
-                    shipRepository.deleteByPlayer(shooter);
+                    shipRepository.deleteByPlayer(requestShooter);
                     shipRepository.deleteByPlayer(targetPlayer);
                     return "победа";
                 }
@@ -138,7 +151,6 @@ public class BaseGameService implements GameService {
 
             return "ранен";
         }
-
     }
 
     private void checkShipPlacement(ShipDTO shipDTO, Player player) {

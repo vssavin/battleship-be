@@ -99,6 +99,7 @@ class BattleshipBeApplicationTests {
     @Test
     void shouldShootResponsePlayerWin_WhenAllShipsDestroyed() {
         Long player1Id = 1L;
+        Long player2Id = 2L;
 
         testSupportService.installAllShipsForPlayer1();
         testSupportService.installAllShipsForPlayer2();
@@ -107,13 +108,15 @@ class BattleshipBeApplicationTests {
 
         List<ShipLocation> shipLocations = testSupportService.getPlayer2AllSectionLocations();
 
-        ResponseEntity<ResponseObject> exchangeResult;
         ResponseObject response = null;
         for(ShipLocation shipLocation: shipLocations) {
-            HttpEntity<ShootDTO> requestEntity = new HttpEntity<>(new ShootDTO(gameId.longValue(), player1Id, shipLocation));
-            exchangeResult = restTemplate.exchange("http://localhost:" + port + SHOOT_ENDPOINT, HttpMethod.PUT,
-                    requestEntity, new ParameterizedTypeReference<>() {});
-            response = exchangeResult.getBody();
+            ShootDTO shootDTO = new ShootDTO(gameId.longValue(), player1Id, shipLocation);
+            response = shoot(player1Id, shootDTO);
+
+            if (response != null && response.getData() == null) {
+                shoot(player2Id, shootDTO);
+                response = shoot(player1Id, shootDTO);
+            }
         }
 
         String status = ((Map<String,String>)response.getData()).get("status");
@@ -134,11 +137,13 @@ class BattleshipBeApplicationTests {
 
         ShipLocation shipLocation = testSupportService.getLocationForAnyOneSectionShip(player2Id);
 
-        HttpEntity<ShootDTO> requestEntity = new HttpEntity<>(new ShootDTO(gameId.longValue(), player1Id, shipLocation));
-        ResponseEntity<ResponseObject> exchangeResult = restTemplate.exchange(
-                "http://localhost:" + port + SHOOT_ENDPOINT, HttpMethod.PUT,
-                requestEntity, new ParameterizedTypeReference<>() {});
-        ResponseObject response = exchangeResult.getBody();
+        ShootDTO shootDTO = new ShootDTO(gameId.longValue(), player1Id, shipLocation);
+        ResponseObject response = shoot(player1Id, shootDTO);
+
+        if (response != null && response.getData() == null) {
+            shoot(player2Id, shootDTO);
+            response = shoot(player1Id, shootDTO);
+        }
 
         String status = ((Map<String,String>)response.getData()).get("status");
 
@@ -158,11 +163,13 @@ class BattleshipBeApplicationTests {
 
         ShipLocation shipLocation = testSupportService.getLocationForAnyTwoSectionShip(player2Id);
 
-        HttpEntity<ShootDTO> requestEntity = new HttpEntity<>(new ShootDTO(gameId.longValue(), player1Id, shipLocation));
-        ResponseEntity<ResponseObject> exchangeResult = restTemplate.exchange(
-                "http://localhost:" + port + SHOOT_ENDPOINT, HttpMethod.PUT,
-                requestEntity, new ParameterizedTypeReference<>() {});
-        ResponseObject response = exchangeResult.getBody();
+        ShootDTO shootDTO = new ShootDTO(gameId.longValue(), player1Id, shipLocation);
+        ResponseObject response = shoot(player1Id, shootDTO);
+
+        if (response != null && response.getData() == null) {
+            shoot(player2Id, shootDTO);
+            response = shoot(player1Id, shootDTO);
+        }
 
         String status = ((Map<String,String>)response.getData()).get("status");
 
@@ -182,16 +189,26 @@ class BattleshipBeApplicationTests {
 
         ShipLocation shipLocation = testSupportService.getEmptyLocation(player2Id);
 
-        HttpEntity<ShootDTO> requestEntity = new HttpEntity<>(new ShootDTO(gameId.longValue(), player1Id, shipLocation));
-        ResponseEntity<ResponseObject> exchangeResult = restTemplate.exchange(
-                "http://localhost:" + port + SHOOT_ENDPOINT, HttpMethod.PUT,
-                requestEntity, new ParameterizedTypeReference<>() {});
-        ResponseObject response = exchangeResult.getBody();
+        ShootDTO shootDTO = new ShootDTO(gameId.longValue(), player1Id, shipLocation);
+        ResponseObject response = shoot(player1Id, shootDTO);
+
+        if (response != null && response.getData() == null) {
+            shoot(player2Id, shootDTO);
+            response = shoot(player1Id, shootDTO);
+        }
 
         String status = ((Map<String,String>)response.getData()).get("status");
 
         assertEquals("мимо", status.toLowerCase());
 
+    }
+
+    private ResponseObject shoot(Long shooterId, ShootDTO shootDTO) {
+        HttpEntity<ShootDTO> requestEntity = new HttpEntity<>(new ShootDTO(shootDTO.gameId(), shooterId, shootDTO.location()));
+        ResponseEntity<ResponseObject> exchangeResult = restTemplate.exchange(
+                "http://localhost:" + port + SHOOT_ENDPOINT, HttpMethod.PUT,
+                requestEntity, new ParameterizedTypeReference<>() {});
+        return exchangeResult.getBody();
     }
 
     private Integer getGameId(Long playerId) {

@@ -21,6 +21,8 @@ public class BaseGameService implements GameService {
 
     private static final Map<Integer, Integer> ALLOWED_SHIP_COUNT_MAP = new HashMap<>();
 
+    private final Random random = new Random();
+
     static {
         ALLOWED_SHIP_COUNT_MAP.put(1, 4);
         ALLOWED_SHIP_COUNT_MAP.put(2, 3);
@@ -65,6 +67,9 @@ public class BaseGameService implements GameService {
             Game game = new Game();
             game.setPlayer1(player);
             game.setPlayer2(opponent);
+            Player[] playerIds = new Player[]{player, opponent};
+            Player shooter = playerIds[random.nextInt(2)];
+            game.setShooter(shooter);
             game = gameRepository.save(game);
             return game.getId();
         } else {

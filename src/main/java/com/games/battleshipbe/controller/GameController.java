@@ -23,7 +23,14 @@ public class GameController {
     @PostMapping(value = "/start")
     public ResponseEntity<ResponseObject> start(@RequestBody PlayerDTO playerDTO) {
         ResponseObject responseObject = new ResponseObject();
-        responseObject.setData(new StartDataResponse(gameService.startGame(playerDTO.id())));
+        try {
+            responseObject.setData(new StartDataResponse(gameService.startGame(playerDTO.id())));
+        } catch (Exception e) {
+            responseObject.setMessage(e.getMessage());
+            responseObject.setSuccess(false);
+            return ResponseEntity.badRequest().body(responseObject);
+        }
+
         return ResponseEntity.ok(responseObject);
     }
 

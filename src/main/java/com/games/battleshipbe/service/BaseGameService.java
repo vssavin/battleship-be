@@ -13,12 +13,20 @@ import com.games.battleshipbe.repository.ShipSectionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
 public class BaseGameService implements GameService {
+
+    private static final Map<Integer, Integer> ALLOWED_SHIP_COUNT_MAP = new HashMap<>();
+
+    static {
+        ALLOWED_SHIP_COUNT_MAP.put(1, 4);
+        ALLOWED_SHIP_COUNT_MAP.put(2, 3);
+        ALLOWED_SHIP_COUNT_MAP.put(3, 2);
+        ALLOWED_SHIP_COUNT_MAP.put(4, 1);
+    }
 
     private final GameRepository gameRepository;
     private final PlayerRepository playerRepository;
@@ -62,7 +70,15 @@ public class BaseGameService implements GameService {
 
     @Override
     public Long putShip(ShipDTO shipDTO) {
-        throw new UnsupportedOperationException("Unimplemented yet!");
+
+        checkShipParamsValid(shipDTO);
+
+        Player player = checkPlayerValid(shipDTO.playerId());
+
+        checkShipPlacement(shipDTO, player);
+
+        return saveShip(player, shipDTO);
+
     }
 
     @Override
@@ -104,6 +120,104 @@ public class BaseGameService implements GameService {
             return "ранен";
         }
 
+    }
+
+    private void checkShipPlacement(ShipDTO shipDTO, Player player) {
+        List<Ship> shipList = shipRepository.findShipsByPlayer(player);
+
+        int maxShipCount = ALLOWED_SHIP_COUNT_MAP.get(shipDTO.length());
+        long shipCount = shipList.stream().filter(ship -> ship.getLength().equals(shipDTO.length())).count();
+        if (shipCount >= maxShipCount) {
+            throw new IllegalArgumentException(String.format("Все корабли размером = %d уже установлены!", shipDTO.length()));
+        }
+
+        long countShipsAtPlace = shipList.stream()
+                .filter(ship ->
+                        ship.getLocationX() == shipDTO.location().x() && ship.getLocationY() == shipDTO.location().y())
+                .count();
+        if (countShipsAtPlace > 0) {
+            throw new IllegalArgumentException("Указанное место занято другим кораблем!");
+        }
+
+        int minX = shipDTO.location().x() - 1;
+        int minY = shipDTO.location().y() - 1;
+        int maxX = 0;
+        int maxY = 0;
+
+        switch (shipDTO.orientation()) {
+            case HORIZONTAL -> {
+                maxX = minX + shipDTO.length() + 1;
+                maxY = minY + 2;
+            }
+
+            case VERTICAL -> {
+                maxY = minY + shipDTO.length() + 1;
+                maxX = minX + 2;
+            }
+        }
+
+        int countShipSections =
+                shipSectionRepository.findByPlayerAndLocationXBetweenAndLocationYBetween(player, minX, maxX, minY, maxY)
+                        .size();
+
+        if (countShipSections != 0) {
+            throw new IllegalArgumentException("Недопустимое место установки корабля!");
+        }
+
+    }
+
+    private Long saveShip(Player player, ShipDTO shipDTO) {
+        Ship ship = new Ship();
+        ship.setPlayer(player);
+        ship.setLocationX(shipDTO.location().x());
+        ship.setLocationY(shipDTO.location().y());
+        ship.setLength(shipDTO.length());
+        ship.setOrientation(shipDTO.orientation());
+        ship.setDestroyed(false);
+        ship = shipRepository.save(ship);
+        int playerShipCount = player.getShipCount();
+        playerShipCount++;
+        player.setShipCount(playerShipCount);
+
+        saveShipSections(ship, player);
+        return ship.getId();
+    }
+
+    private void saveShipSections(Ship ship, Player player) {
+        List<ShipSection> sectionList = new ArrayList<>();
+
+        for (int i = 0; i < ship.getLength(); i++) {
+            ShipSection section = new ShipSection();
+            section.setShip(ship);
+            section.setPlayer(player);
+            section.setLocationX(ship.getLocationX());
+            section.setLocationY(ship.getLocationY());
+            section.setSectionNumber(i + 1);
+            section.setDestroyed(false);
+
+            switch (ship.getOrientation()) {
+                case HORIZONTAL -> section.setLocationX(section.getLocationX() + i);
+                case VERTICAL -> section.setLocationY(section.getLocationY() + i);
+            }
+
+            sectionList.add(section);
+        }
+
+        shipSectionRepository.saveAll(sectionList);
+    }
+
+    private void checkShipParamsValid(ShipDTO shipDTO) {
+        if (shipDTO.location().x() < 0 || shipDTO.location().x() > 9) {
+            throw new IllegalArgumentException("Неправильные координаты корабля! Допустимые значение: [0-9]");
+        }
+
+        if (shipDTO.location().y() < 0 || shipDTO.location().y() > 9) {
+            throw new IllegalArgumentException("Неправильные координаты корабля! Допустимые значение: [0-9]");
+        }
+
+        if (shipDTO.length() < 1 || shipDTO.length() > 4) {
+            throw new IllegalArgumentException("Неправильный размер корабля! Допустимые значение: [1-4]");
+        }
     }
 
     private void checkAllShipsInstalled(Player player) {

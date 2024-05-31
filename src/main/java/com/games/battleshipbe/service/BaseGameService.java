@@ -123,6 +123,22 @@ public class BaseGameService implements GameService {
     }
 
     private void checkShipPlacement(ShipDTO shipDTO, Player player) {
+        String wrongPlaceMessage = "Недопустимое место установки корабля!";
+
+        switch (shipDTO.orientation()) {
+            case HORIZONTAL -> {
+                if ((shipDTO.location().x() + shipDTO.length() - 1) > 9) {
+                    throw new IllegalArgumentException(wrongPlaceMessage);
+                }
+            }
+
+            case VERTICAL -> {
+                if ((shipDTO.location().y() + shipDTO.length() - 1) > 9) {
+                    throw new IllegalArgumentException(wrongPlaceMessage);
+                }
+            }
+        }
+
         List<Ship> shipList = shipRepository.findShipsByPlayer(player);
 
         int maxShipCount = ALLOWED_SHIP_COUNT_MAP.get(shipDTO.length());
@@ -161,7 +177,7 @@ public class BaseGameService implements GameService {
                         .size();
 
         if (countShipSections != 0) {
-            throw new IllegalArgumentException("Недопустимое место установки корабля!");
+            throw new IllegalArgumentException(wrongPlaceMessage);
         }
 
     }

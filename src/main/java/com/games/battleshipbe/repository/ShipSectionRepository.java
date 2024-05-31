@@ -15,5 +15,7 @@ public interface ShipSectionRepository extends JpaRepository<ShipSection, Long> 
 
     List<ShipSection> findShipSectionsByShip(Ship ship);
 
+    List<ShipSection> findByPlayerAndLocationXBetweenAndLocationYBetween(Player player, Integer minX, Integer maxX, Integer minY, Integer maxY);
+
     void deleteByPlayer(Player player);
 }

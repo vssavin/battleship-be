@@ -24,4 +24,8 @@ public class Game {
     @ManyToOne
     @JoinColumn(name = "winner_id", referencedColumnName = "id")
     private Player winner;
+
+    @ManyToOne
+    @JoinColumn(name = "shooter_id", referencedColumnName = "id")
+    private Player shooter;
 }

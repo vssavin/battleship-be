@@ -36,11 +36,11 @@ public class GameController {
 
     @PostMapping("/putShip")
     public ResponseEntity<ResponseObject> putShip(@RequestBody ShipDTO shipDTO) {
+        ResponseObject responseObject = new ResponseObject();
         try {
             gameService.putShip(shipDTO);
-            return ResponseEntity.ok(null);
+            return ResponseEntity.ok(responseObject);
         } catch (Exception e) {
-            ResponseObject responseObject = new ResponseObject();
             responseObject.setMessage(e.getMessage());
             responseObject.setSuccess(false);
             return ResponseEntity.badRequest().body(responseObject);

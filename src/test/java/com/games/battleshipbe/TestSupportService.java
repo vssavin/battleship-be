@@ -95,6 +95,40 @@ public class TestSupportService {
     }
 
     ShipLocation getLocationForAnyOneSectionShip(Long playerId) {
+        return getLocationForAnyShip(playerId, 1);
+    }
+
+    ShipLocation getLocationForAnyTwoSectionShip(Long playerId) {
+        return getLocationForAnyShip(playerId, 2);
+    }
+
+    ShipLocation getEmptyLocation(Long playerId) {
+        Optional<Player> optionalPlayer = playerRepository.findById(playerId);
+        if (optionalPlayer.isEmpty()) {
+            throw new IllegalStateException("Player with id=" + playerId + " not found!");
+        }
+
+        Player player = optionalPlayer.get();
+
+        List<ShipSection> shipSectionList = shipSectionRepository
+                .findByPlayerAndLocationXBetweenAndLocationYBetween(player, 0, 9, 0, 9);
+
+        int[][] fieldArray = new int[10][10];
+
+        shipSectionList.forEach(shipSection -> fieldArray[shipSection.getLocationX()][shipSection.getLocationY()] = 1);
+
+        for (int x = 0; x < 10; x++) {
+            for (int y = 0; y < 10; y++) {
+                if (fieldArray[x][y] == 0) {
+                    return new ShipLocation(x, y);
+                }
+            }
+        }
+
+        throw new IllegalStateException("Не найдено пустое место на поле!");
+    }
+
+    ShipLocation getLocationForAnyShip(Long playerId, int shipLength) {
         Optional<Player> optionalPlayer = playerRepository.findById(playerId);
         if (optionalPlayer.isEmpty()) {
             throw new IllegalStateException("Player with id=" + playerId + " not found!");
@@ -103,14 +137,13 @@ public class TestSupportService {
         Player player = optionalPlayer.get();
 
         List<Ship> shipList = shipRepository.findShipsByPlayer(player);
-        Optional<Ship> optionalShip = shipList.stream().filter(ship -> ship.getLength() == 1).findAny();
+        Optional<Ship> optionalShip = shipList.stream().filter(ship -> ship.getLength() == shipLength).findAny();
 
         if (optionalShip.isEmpty()) {
             throw new IllegalStateException("Ships for player id =" + playerId + " not found!");
         }
 
         return new ShipLocation(optionalShip.get().getLocationX(), optionalShip.get().getLocationY());
-
     }
 
     private Ship saveShip(Player player, int locationX, int locationY, int length, ShipOrientation orientation) {

@@ -45,8 +45,22 @@ public class BaseGameService implements GameService {
     public Long startGame(Long playerId) {
         Player player = checkPlayerValid(playerId);
         checkAllShipsInstalled(player);
-        Player opponent = findOpponent(player);
-        Optional<Game> optionalGame = gameRepository.findGameByPlayer1AndPlayer2AndWinnerNull(player, opponent);
+        Optional<Game> optionalGame = gameRepository.findGameByWinnerNullAndPlayer1OrPlayer2(player, player);
+        Player opponent = null;
+        if (optionalGame.isPresent()) {
+            Player player1 = optionalGame.get().getPlayer1();
+            Player player2 = optionalGame.get().getPlayer2();
+            if (player.getId().equals(player1.getId())) {
+                opponent = player2;
+            } else {
+                opponent = player1;
+            }
+        }
+
+        if (opponent == null) {
+            opponent = findOpponent(player);
+        }
+
         if (optionalGame.isEmpty()) {
             Game game = new Game();
             game.setPlayer1(player);

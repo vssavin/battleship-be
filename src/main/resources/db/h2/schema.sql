@@ -11,19 +11,22 @@ create table IF NOT EXISTS PUBLIC.PLAYER
     SHIP_COUNT INTEGER
 );
 
-create table IF NOT EXISTS PUBLIC.GAME
+create table PUBLIC.GAME
 (
     ID          BIGINT auto_increment
         primary key,
     PLAYER_1_ID BIGINT,
     PLAYER_2_ID BIGINT,
+    SHOOTER_ID  BIGINT,
     WINNER_ID   BIGINT,
     constraint FKDAOA02UM96NKW564TRBQ0JHXG
         foreign key (WINNER_ID) references PUBLIC.PLAYER,
     constraint FKHB6LO8WIMWBYXSCRUFRNEDMSA
         foreign key (PLAYER_1_ID) references PUBLIC.PLAYER,
     constraint FKI0O6UXBQXP8DSMWYHSRCYSLW8
-        foreign key (PLAYER_2_ID) references PUBLIC.PLAYER
+        foreign key (PLAYER_2_ID) references PUBLIC.PLAYER,
+    constraint FKOMNPYJ08EV1H9R5QFIYT6LR4E
+        foreign key (SHOOTER_ID) references PUBLIC.PLAYER
 );
 
 create table IF NOT EXISTS PUBLIC.SHIP

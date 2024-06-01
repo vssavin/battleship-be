@@ -125,9 +125,8 @@ public class BaseGameService implements GameService {
             nextShooter = game.getPlayer1();
         }
 
-        game.setShooter(nextShooter);
-
         if (optionalSection.isEmpty()) {
+            game.setShooter(nextShooter);
             return "мимо";
         } else {
             ShipSection shipSection = optionalSection.get();

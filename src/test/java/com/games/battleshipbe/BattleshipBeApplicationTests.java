@@ -114,7 +114,9 @@ class BattleshipBeApplicationTests {
             response = shoot(player1Id, shootDTO);
 
             if (response != null && response.getData() == null) {
-                shoot(player2Id, shootDTO);
+                ShipLocation player1ShipLocation = testSupportService.getEmptyLocation(player1Id);
+                ShootDTO player1ShootDTO = new ShootDTO(gameId.longValue(), player1Id, player1ShipLocation);
+                shoot(player2Id, player1ShootDTO);
                 response = shoot(player1Id, shootDTO);
             }
         }
@@ -141,7 +143,9 @@ class BattleshipBeApplicationTests {
         ResponseObject response = shoot(player1Id, shootDTO);
 
         if (response != null && response.getData() == null) {
-            shoot(player2Id, shootDTO);
+            ShipLocation player1ShipLocation = testSupportService.getEmptyLocation(player1Id);
+            ShootDTO player1ShootDTO = new ShootDTO(gameId.longValue(), player1Id, player1ShipLocation);
+            shoot(player2Id, player1ShootDTO);
             response = shoot(player1Id, shootDTO);
         }
 
@@ -167,7 +171,9 @@ class BattleshipBeApplicationTests {
         ResponseObject response = shoot(player1Id, shootDTO);
 
         if (response != null && response.getData() == null) {
-            shoot(player2Id, shootDTO);
+            ShipLocation player1ShipLocation = testSupportService.getEmptyLocation(player1Id);
+            ShootDTO player1ShootDTO = new ShootDTO(gameId.longValue(), player1Id, player1ShipLocation);
+            shoot(player2Id, player1ShootDTO);
             response = shoot(player1Id, shootDTO);
         }
 
@@ -193,7 +199,9 @@ class BattleshipBeApplicationTests {
         ResponseObject response = shoot(player1Id, shootDTO);
 
         if (response != null && response.getData() == null) {
-            shoot(player2Id, shootDTO);
+            ShipLocation player1ShipLocation = testSupportService.getEmptyLocation(player1Id);
+            ShootDTO player1ShootDTO = new ShootDTO(gameId.longValue(), player1Id, player1ShipLocation);
+            shoot(player2Id, player1ShootDTO);
             response = shoot(player1Id, shootDTO);
         }
 

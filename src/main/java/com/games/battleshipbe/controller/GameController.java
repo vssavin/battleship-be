@@ -10,6 +10,8 @@ import com.games.battleshipbe.service.GameService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+
 @RestController
 @RequestMapping("/game")
 public class GameController {
@@ -26,7 +28,8 @@ public class GameController {
         try {
             responseObject.setData(new StartDataResponse(gameService.startGame(playerDTO.id())));
         } catch (Exception e) {
-            responseObject.setMessage(e.getMessage());
+            responseObject.setMessage(e.getMessage() + "\n" +
+                    Arrays.asList(e.getStackTrace()).toString().replace(",", "\n"));
             responseObject.setSuccess(false);
             return ResponseEntity.badRequest().body(responseObject);
         }
@@ -41,7 +44,8 @@ public class GameController {
             gameService.putShip(shipDTO);
             return ResponseEntity.ok(responseObject);
         } catch (Exception e) {
-            responseObject.setMessage(e.getMessage());
+            responseObject.setMessage(e.getMessage() + "\n" +
+                    Arrays.asList(e.getStackTrace()).toString().replace(",", "\n"));
             responseObject.setSuccess(false);
             return ResponseEntity.badRequest().body(responseObject);
         }
@@ -55,7 +59,8 @@ public class GameController {
             responseObject.setData(shootDataResponse);
             return ResponseEntity.ok(responseObject);
         } catch (Exception e) {
-            responseObject.setMessage(e.getMessage());
+            responseObject.setMessage(e.getMessage() + "\n" +
+                    Arrays.asList(e.getStackTrace()).toString().replace(",", "\n"));
             responseObject.setSuccess(false);
             return ResponseEntity.badRequest().body(responseObject);
         }

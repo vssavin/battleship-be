@@ -20,7 +20,7 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping(value = "/start")
+    @PostMapping(value = "/startGame")
     public ResponseEntity<ResponseObject> start(@RequestBody PlayerDTO playerDTO) {
         ResponseObject responseObject = new ResponseObject();
         try {

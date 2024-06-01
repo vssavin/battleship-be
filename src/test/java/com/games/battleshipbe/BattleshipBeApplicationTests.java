@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = {"classpath:test_schema.sql", "classpath:test_data.sql"})
 class BattleshipBeApplicationTests {
-    private static final String START_ENDPOINT = "/game/start";
+    private static final String START_ENDPOINT = "/game/startGame";
     private static final String PUT_SHIP_ENDPOINT = "/game/putShip";
     private static final String SHOOT_ENDPOINT = "/game/shoot";
 

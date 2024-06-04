@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  postgres-battleship-be:
+    container_name: postgres-15.3-battleship-be
+    image: postgres:15.3
+    restart: always
+    healthcheck:
+      test: pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    volumes:
+      - "/usr/share/docker-postgres-battleship-be/database:/var/lib/postgresql/data"
+      - "./src/main/resources/db/postgres/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql"
+      - "./src/main/resources/db/postgres/data.sql:/docker-entrypoint-initdb.d/2-data.sql"
+    ports:
+      - "54324:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: battleship
+
+  battleship-be:
+    container_name: battleship-be
+    build:
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      postgres-battleship-be:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-battleship-be:5432/battleship
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    ports:
+      - "8090:8080"

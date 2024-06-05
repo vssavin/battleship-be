@@ -25,6 +25,7 @@ services:
   battleship-be:
     container_name: battleship-be
     build:
+      context: .
       dockerfile: Dockerfile
     restart: always
     depends_on:

@@ -24,45 +24,45 @@ public class GameController {
 
     @PostMapping(value = "/startGame")
     public ResponseEntity<ResponseObject> start(@RequestBody PlayerDTO playerDTO) {
-        ResponseObject responseObject = new ResponseObject();
         try {
-            responseObject.setData(new StartDataResponse(gameService.startGame(playerDTO.id())));
+            return getOkResponseEntity(new StartDataResponse(gameService.startGame(playerDTO.id())));
         } catch (Exception e) {
-            responseObject.setMessage(e.getMessage() + "\n" +
-                    Arrays.asList(e.getStackTrace()).toString().replace(",", "\n"));
-            responseObject.setSuccess(false);
-            return ResponseEntity.badRequest().body(responseObject);
+            return getErrorResponseEntity(e);
         }
-
-        return ResponseEntity.ok(responseObject);
     }
 
     @PostMapping("/putShip")
     public ResponseEntity<ResponseObject> putShip(@RequestBody ShipDTO shipDTO) {
-        ResponseObject responseObject = new ResponseObject();
         try {
             gameService.putShip(shipDTO);
-            return ResponseEntity.ok(responseObject);
+            return getOkResponseEntity(null);
         } catch (Exception e) {
-            responseObject.setMessage(e.getMessage() + "\n" +
-                    Arrays.asList(e.getStackTrace()).toString().replace(",", "\n"));
-            responseObject.setSuccess(false);
-            return ResponseEntity.badRequest().body(responseObject);
+            return getErrorResponseEntity(e);
         }
     }
 
     @PutMapping("/shoot")
-    public ResponseEntity<Object> shoot(@RequestBody ShootDTO shootDTO) {
-        ResponseObject responseObject = new ResponseObject();
+    public ResponseEntity<ResponseObject> shoot(@RequestBody ShootDTO shootDTO) {
         try {
-            ShootDataResponse shootDataResponse = new ShootDataResponse(gameService.shoot(shootDTO));
-            responseObject.setData(shootDataResponse);
-            return ResponseEntity.ok(responseObject);
+            return getOkResponseEntity(new ShootDataResponse(gameService.shoot(shootDTO)));
         } catch (Exception e) {
-            responseObject.setMessage(e.getMessage() + "\n" +
-                    Arrays.asList(e.getStackTrace()).toString().replace(",", "\n"));
-            responseObject.setSuccess(false);
-            return ResponseEntity.badRequest().body(responseObject);
+            return getErrorResponseEntity(e);
         }
+    }
+
+    private ResponseEntity<ResponseObject> getOkResponseEntity(Object data) {
+        ResponseObject responseObject = new ResponseObject();
+        responseObject.setData(data);
+        return ResponseEntity.ok(responseObject);
+    }
+
+    private ResponseEntity<ResponseObject> getErrorResponseEntity(Throwable throwable) {
+        ResponseObject responseObject = new ResponseObject();
+        if (throwable != null) {
+            responseObject.setMessage(throwable.getMessage() + "\n" +
+                    Arrays.asList(throwable.getStackTrace()).toString().replace(",", "\n"));
+        }
+        responseObject.setSuccess(false);
+        return ResponseEntity.badRequest().body(responseObject);
     }
 }
